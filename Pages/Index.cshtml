@@ -1,10 +1,146 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Events";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<main class="app-shell">
+    <header class="app-header">
+        <div>
+            <p class="eyebrow">CivicPlus Calendar</p>
+            <h1>Events</h1>
+        </div>
+    </header>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <section class="status-panel error-panel" role="alert">
+            <h2>Unable to load events</h2>
+            <p>@Model.ErrorMessage</p>
+        </section>
+    }
+
+    <section class="event-form-panel">
+        <h2>Add Event</h2>
+        <form method="post" asp-page-handler="Create" class="event-form">
+            <div asp-validation-summary="ModelOnly" class="form-error"></div>
+
+            <label>
+                <span>Event Title</span>
+                <input asp-for="NewEvent.Title" />
+                <span asp-validation-for="NewEvent.Title" class="field-error"></span>
+            </label>
+
+            <label>
+                <span>Description</span>
+                <textarea asp-for="NewEvent.Description" rows="4"></textarea>
+                <span asp-validation-for="NewEvent.Description" class="field-error"></span>
+            </label>
+
+            <div class="form-grid">
+                <label>
+                    <span>Start Date</span>
+                    <input asp-for="NewEvent.StartDate" type="datetime-local" />
+                    <span asp-validation-for="NewEvent.StartDate" class="field-error"></span>
+                </label>
+
+                <label>
+                    <span>End Date</span>
+                    <input asp-for="NewEvent.EndDate" type="datetime-local" />
+                    <span asp-validation-for="NewEvent.EndDate" class="field-error"></span>
+                </label>
+            </div>
+
+            <button class="primary-button" type="submit">Add Event</button>
+        </form>
+    </section>
+
+    <section class="event-section" aria-live="polite">
+        @if (Model.Events.Count > 0)
+        {
+            <ul class="event-list">
+                @foreach (var calendarEvent in Model.Events)
+                {
+                    <li class="event-card">
+                        <div class="event-date">
+                            <span>@(calendarEvent.StartDate?.ToString("MMM") ?? "TBD")</span>
+                            <strong>@(calendarEvent.StartDate?.ToString("dd") ?? "--")</strong>
+                        </div>
+                        <div class="event-content">
+                            <h2>@(calendarEvent.Title ?? "Untitled event")</h2>
+                            <p>@(calendarEvent.Description ?? "No description provided.")</p>
+                            <dl>
+                                <div>
+                                    <dt>Starts</dt>
+                                    <dd>@(calendarEvent.StartDate?.ToString("MMM d, yyyy, h:mm tt") ?? "Not scheduled")</dd>
+                                </div>
+                                <div>
+                                    <dt>Ends</dt>
+                                    <dd>@(calendarEvent.EndDate?.ToString("MMM d, yyyy, h:mm tt") ?? "Not scheduled")</dd>
+                                </div>
+                            </dl>
+
+                            <div class="event-actions" aria-label="Calendar export options">
+                                @if (IndexModel.CanExport(calendarEvent))
+                                {
+                                    <a class="secondary-button compact-button"
+                                       download="@(Model.GetCalendarFileName(calendarEvent)).ics"
+                                       href="@Model.GetIcsDataUri(calendarEvent)">Download .ics</a>
+                                    <a class="secondary-button compact-button"
+                                       download="@(Model.GetCalendarFileName(calendarEvent)).ics"
+                                       href="@Model.GetIcsDataUri(calendarEvent)">Apple Calendar</a>
+                                    <a class="secondary-button compact-button"
+                                       href="@Model.GetGoogleCalendarUrl(calendarEvent)"
+                                       target="_blank"
+                                       rel="noreferrer">Google Calendar</a>
+                                }
+                                else
+                                {
+                                    <p class="export-note">Calendar export needs a start and end date.</p>
+                                }
+                            </div>
+                        </div>
+                    </li>
+                }
+            </ul>
+        }
+        else if (string.IsNullOrWhiteSpace(Model.ErrorMessage))
+        {
+            <div class="status-panel">
+                <h2>No events yet</h2>
+                <p>Add the first event to start building the calendar.</p>
+            </div>
+        }
+    </section>
+
+    <footer class="pagination-bar" aria-label="Event pagination">
+        <form method="get" class="page-size-control">
+            <label>
+                <span>Rows per page</span>
+                <select asp-for="PageSize" onchange="this.form.submit()">
+                    @foreach (var option in Model.PageSizeOptions)
+                    {
+                        <option value="@option">@option</option>
+                    }
+                </select>
+            </label>
+            <input type="hidden" name="PageNumber" value="1" />
+        </form>
+
+        <p class="pagination-summary">
+            Showing @Model.FirstVisibleEvent-@Model.LastVisibleEvent of @Model.TotalEvents
+        </p>
+
+        <div class="pagination-actions">
+            <a class="secondary-button compact-button @(Model.PageNumber <= 1 ? "disabled-link" : "")"
+               asp-page="./Index"
+               asp-route-pageNumber="@(Model.PageNumber - 1)"
+               asp-route-pageSize="@Model.PageSize">Previous</a>
+            <span>Page @Model.PageNumber of @Model.PageCount</span>
+            <a class="secondary-button compact-button @(Model.PageNumber >= Model.PageCount ? "disabled-link" : "")"
+               asp-page="./Index"
+               asp-route-pageNumber="@(Model.PageNumber + 1)"
+               asp-route-pageSize="@Model.PageSize">Next</a>
+        </div>
+    </footer>
+</main>
