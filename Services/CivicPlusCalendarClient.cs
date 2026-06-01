@@ -6,7 +6,16 @@ using Microsoft.Extensions.Options;
 
 namespace CivicPlusCalendar.Services;
 
-public sealed class CivicPlusCalendarClient
+public interface ICivicPlusCalendarClient
+{
+    Task<EventList> ListEventsAsync(int skip, int top, CancellationToken cancellationToken);
+
+    Task<CalendarEvent> CreateEventAsync(
+        CreateEventRequest newEvent,
+        CancellationToken cancellationToken);
+}
+
+public sealed class CivicPlusCalendarClient : ICivicPlusCalendarClient
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private readonly HttpClient _httpClient;

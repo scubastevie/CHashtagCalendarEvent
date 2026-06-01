@@ -1,7 +1,11 @@
+using CivicPlusCalendar.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.Configure<CivicPlusOptions>(builder.Configuration.GetSection("CivicPlus"));
+builder.Services.AddHttpClient<ICivicPlusCalendarClient, CivicPlusCalendarClient>();
 
 var app = builder.Build();
 

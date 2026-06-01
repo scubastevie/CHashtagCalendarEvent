@@ -9,9 +9,9 @@ namespace CivicPlusCalendar.Pages;
 
 public sealed class IndexModel : PageModel
 {
-    private readonly CivicPlusCalendarClient _calendarClient;
+    private readonly ICivicPlusCalendarClient _calendarClient;
 
-    public IndexModel(CivicPlusCalendarClient calendarClient)
+    public IndexModel(ICivicPlusCalendarClient calendarClient)
     {
         _calendarClient = calendarClient;
     }
