@@ -38,11 +38,32 @@ ScaffoldingReadMe.txt
 
 # dotenv environment variables file
 .env
+.env.*
+!.env.example
+
+# Local application settings
+appsettings.Development.json
+appsettings.*.Local.json
 
 # Others
 ~$*
 *~
 CodeCoverage/
+.DS_Store
+Thumbs.db
+
+# User- and IDE-specific files
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Frontend dependencies and generated client libraries
+node_modules/
+wwwroot/lib/
 
 # MSBuild Binary and Structured Log
 *.binlog
